@@ -1,16 +1,15 @@
 const { Task } = require('../models')
-const { verifyJwt } = require('../helpers/jwt')
 
 module.exports = class ControllerTask {
   static async getTask(req,res,next) {
     try {
-      const user = verifyJwt(req.headers.access_token)
+      const user = req.user
       let task;
       if(user.userType === 'employee') {
-        task = await Task.findAll({where: {employeeId: user.employeeId}})
+        task = await Task.findAll({where: {employeeId: user.employeeId}, order: [['id', 'ASC']]})
         res.status(200).json(task)
       } else if(user.userType == 'manager') {
-        task = await Task.findAll({where: {managerId: user.managerId}})
+        task = await Task.findAll({where: {managerId: user.managerId}, order: [['id', 'ASC']]})
         res.status(200).json(task)
       }
     } catch (error) {
@@ -20,7 +19,7 @@ module.exports = class ControllerTask {
 
   static async postTask(req,res,next) {
     try {
-      const user = verifyJwt(req.headers.access_token)
+      const user = req.user
       const {task, status} = req.body
       await Task.create({task, employeeId: user.employeeId, managerId: user.managerId, status})
       res.status(201).json({message: 'create task success!'})
@@ -40,7 +39,7 @@ module.exports = class ControllerTask {
           returning: true
         })
       if(editedTask[1].length === 0) throw {error: 'Task not found!', status: 400}
-      res.status(200).json(editedTask[1])
+      res.status(200).json(editedTask[1][0])
     } catch (error) {
       next(error)
     }
@@ -52,7 +51,7 @@ module.exports = class ControllerTask {
       const id = req.params.id
       const editedStatusTask = await Task.update({status}, {where: {id}, returning: true})
       if(editedStatusTask[1].length === 0) throw {error: 'Task not found!', status: 400}
-      res.status(200).json(editedStatusTask[1])
+      res.status(200).json(editedStatusTask[1][0])
     } catch (error) {
       next(error)
     }
