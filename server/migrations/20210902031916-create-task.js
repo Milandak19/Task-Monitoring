@@ -14,10 +14,19 @@ module.exports = {
       status: {
         type: Sequelize.STRING
       },
-      userId: {
+      employeeId: {
         type: Sequelize.INTEGER,
         references: {
-          model: 'Users',
+          model: 'Employees',
+          key: 'id'
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+      },
+      managerId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'Managers',
           key: 'id'
         },
         onDelete: 'CASCADE',
