@@ -28,4 +28,44 @@ module.exports = class ControllerTask {
       next(error)
     }
   }
+
+  static async putTask(req,res,next) {
+    try {
+      const {task, status} = req.body
+      const id = req.params.id
+      const editedTask = await Task.update(
+        {task, status},
+        {
+          where: {id}, 
+          returning: true
+        })
+      if(editedTask[1].length === 0) throw {error: 'Task not found!', status: 400}
+      res.status(200).json(editedTask[1])
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static async patchTask(req,res,next) {
+    try {
+      const {status} = req.body
+      const id = req.params.id
+      const editedStatusTask = await Task.update({status}, {where: {id}, returning: true})
+      if(editedStatusTask[1].length === 0) throw {error: 'Task not found!', status: 400}
+      res.status(200).json(editedStatusTask[1])
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static async destroyTask(req,res,next) {
+    try {
+      const id = req.params.id
+      const deletedTask = await Task.destroy({where: {id}})
+      if(!deletedTask) throw {error: 'Task not found!', status: 400}
+      res.status(200).json({message: 'delete task success!'})
+    } catch (error) {
+      next(error)
+    }
+  }
 }
