@@ -20,7 +20,7 @@ class Controller {
       res.status(200).json({ access_token })
     })
     .catch(error => {
-      res.status(400).json(error)
+      next(error)
     })
   }
 
@@ -31,7 +31,7 @@ class Controller {
       res.status(201).json({message: 'Register Success'})
     })
     .catch(error => {
-      res.status(400, error.message)
+      next(error)
     })
   }
 }
