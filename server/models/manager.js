@@ -1,4 +1,5 @@
 'use strict';
+const { hashPass } = require('../helpers/bcrypt')
 const {
   Model
 } = require('sequelize');
@@ -15,8 +16,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   };
   Manager.init({
-    userId: DataTypes.INTEGER
+    userId: DataTypes.INTEGER,
+    secretKey: DataTypes.STRING
   }, {
+    hooks: {
+      beforeCreate(manager, option) {
+        manager.secretKey = hashPass(`${+new Date()} ${manager.userId}`)
+      }
+    },
     sequelize,
     modelName: 'Manager',
   });
