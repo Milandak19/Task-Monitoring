@@ -1,17 +1,38 @@
-const { Task } = require('../models')
+const { Task, User, Employee } = require('../models')
 
 module.exports = class ControllerTask {
-  static async getTask(req,res,next) {
+  static async getTasks(req,res,next) {
     try {
       const user = req.user
       let task;
+      let employee= [];
+      let resss = []
       if(user.userType === 'employee') {
         task = await Task.findAll({where: {employeeId: user.employeeId}, order: [['id', 'ASC']]})
         res.status(200).json(task)
       } else if(user.userType == 'manager') {
         task = await Task.findAll({where: {managerId: user.managerId}, order: [['id', 'ASC']]})
-        res.status(200).json(task)
+        for (let i = 0; i < task.length; i++) {
+          let temp = await Employee.findAll({where: {id: task[i].employeeId}, include: [User]})
+          employee.push({
+            ...task[i].dataValues,
+            name: `${temp[0].User.firstName} ${temp[0].User.lastName}`,
+          })
+        }
+        console.log(employee)
+        res.status(200).json(employee)
       }
+    } catch (error) {
+      console.log(error)
+      next(error)
+    }
+  }
+
+  static async getTask(req,res,next) {
+    try {
+      const task = await Task.findByPk(req.params.id)
+      if(!task) throw {error: 'Task not found!', status: 400}
+      res.status(200).json(task)
     } catch (error) {
       next(error)
     }
