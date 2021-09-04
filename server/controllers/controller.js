@@ -53,7 +53,21 @@ class Controller {
     } catch(error) {
       next(error)
     }
-    
+  }
+
+  static async getUser (req, res, next) {
+    try {
+      let data = {}
+      if(req.user.userTpe === 'employee') {
+        data = {name: `${req.user.firstName} ${req.user.lastName}`, email: req.user.email, userType: req.user.userType}
+      } else {
+        let manager = await Manager.findByPk(req.user.managerId)
+        data = {name: `${req.user.firstName} ${req.user.lastName}`, email: req.user.email, userType: req.user.userType, secretKey: manager.secretKey}
+      }
+      res.status(200).json(data)
+    } catch (error) {
+      next(error)
+    }
   }
 }
 
